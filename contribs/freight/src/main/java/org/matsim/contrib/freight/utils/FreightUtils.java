@@ -131,7 +131,7 @@ public class FreightUtils {
 			log.debug("Converting CarrierService to CarrierShipment: " + carrierService.getId());
 			CarrierShipment carrierShipment = CarrierShipment.Builder.newInstance(Id.create(carrierService.getId().toString(), CarrierShipment.class), 
 					depotServiceIsdeliveredFrom.get(carrierService.getId()), 
-					carrierService.getLocationLinkId(), 
+					carrierService.getLinkId(),
 					carrierService.getCapacityDemand())
 					.setDeliveryServiceTime(carrierService.getServiceDuration())
 					//						.setPickupServiceTime(pickupServiceTime)			//Not set yet, because in service we have now time for that. Maybe change it later, kmt sep18

@@ -1,31 +1,45 @@
 package org.matsim.contrib.freight.carrier;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.population.BasicActivity;
+import org.matsim.facilities.ActivityFacility;
 
 
-public class CarrierService  {
+public final class CarrierService implements BasicActivity{
+
+	private Coord coord;
 
 	public static class Builder {
-		
-		public static Builder newInstance(Id<CarrierService> id, Id<Link> locationLinkId){
+
+		public static Builder newInstance( Id<CarrierService> id, Id<Link> locationLinkId ){
 			return new Builder(id,locationLinkId);
 		}
-		
+		public static Builder newInstance(Id<CarrierService> id, Coord coord){
+			return new Builder(id,coord);
+		}
+
 		private Id<CarrierService> id;
 		private Id<Link> locationLinkId;
+		private Coord coord;
 		private String name = "service";
 		
 		private double serviceTime = 0.0;
 		private TimeWindow timeWindow = TimeWindow.newInstance(0.0, Integer.MAX_VALUE);
 		private int capacityDemand = 0;
-		
+
 		private Builder(Id<CarrierService> id, Id<Link> locationLinkId) {
 			super();
 			this.id = id;
 			this.locationLinkId = locationLinkId;
 		}
-		
+		private Builder(Id<CarrierService> id, Coord coord) {
+			super();
+			this.id = id;
+			this.coord = coord ;
+		}
+
 		public Builder setName(String name){
 			this.name = name;
 			return this;
@@ -64,13 +78,16 @@ public class CarrierService  {
 			this.capacityDemand = value;
 			return this;
 		}
-		
+
+		public void setLinkId( Id<Link> linkId ){
+			this.locationLinkId = linkId ;
+		}
 	}
 	
 	
 	private final Id<CarrierService> id;
 
-	private final Id<Link> locationId;
+	private Id<Link> locationId;
 	
 	private final String name;
 	
@@ -87,14 +104,32 @@ public class CarrierService  {
 		timeWindow = builder.timeWindow;
 		demand = builder.capacityDemand;
 		name = builder.name;
+		coord = builder.coord ;
 	}
 
 	public Id<CarrierService> getId() {
 		return id;
 	}
 
-	public Id<Link> getLocationLinkId() {
+	public Id<Link> getLinkId() {
 		return locationId;
+	}
+	public void setLinkId(Id<Link> linkId) {
+		// if we allow CarrierService to initially have only coordinates, then it needs to be possible to set the link later.
+		// Alternatively, could generate the link when reading the file.  That, however, would imply to _always_ have a network
+		// when reading the carrier file, which is impractical and was eventually removed in main matsim.  kai, nov'18
+
+		this.locationId = linkId ;
+	}
+
+	public Id<ActivityFacility> getFacilityId() {
+		return null ;
+		// yyyy maybe implement at some point.  kai/kmt, nov'18
+	}
+
+	@Override
+	public Coord getCoord(){
+		return this.coord ;
 	}
 
 	public double getServiceDuration() {

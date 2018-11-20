@@ -1020,7 +1020,7 @@ public final class PopulationUtils {
 		new PopulationWriter( population).write( filename ); 
 	}
 	
-	public static Id<Link> decideOnLinkIdForActivity( Activity act, Scenario sc ) {
+	public static Id<Link> decideOnLinkIdForActivity( BasicActivity act, Scenario sc ) {
 		if ( act.getFacilityId() !=null ) {
 			final ActivityFacility facility = sc.getActivityFacilities().getFacilities().get( act.getFacilityId() );;
 			if ( facility==null ) {
@@ -1032,7 +1032,7 @@ public final class PopulationUtils {
 		Gbl.assertNotNull( act.getLinkId() );
 		return act.getLinkId() ;
 	}
-	public static Coord decideOnCoordForActivity( Activity act, Scenario sc ) {
+	public static Coord decideOnCoordForActivity( BasicActivity act, Scenario sc ) {
 		if ( act.getFacilityId() !=null ) {
 			final ActivityFacility facility = sc.getActivityFacilities().getFacilities().get( act.getFacilityId() );;
 			Gbl.assertNotNull( facility  );

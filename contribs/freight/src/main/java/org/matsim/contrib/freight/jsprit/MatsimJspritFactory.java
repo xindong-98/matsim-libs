@@ -34,14 +34,11 @@ import org.matsim.contrib.freight.carrier.Tour;
 import org.matsim.contrib.freight.carrier.Tour.Leg;
 import org.matsim.contrib.freight.carrier.Tour.TourElement;
 
-import com.graphhopper.jsprit.core.problem.AbstractJob;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem.FleetSize;
 import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingActivityCosts;
 import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
-import com.graphhopper.jsprit.core.problem.job.Delivery;
-import com.graphhopper.jsprit.core.problem.job.Pickup;
 import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.job.Service.Builder;
 import com.graphhopper.jsprit.core.problem.job.Shipment;
@@ -156,7 +153,7 @@ public class MatsimJspritFactory {
 	
 	static Service createService(CarrierService carrierService, Coord locationCoord) {
 		Location.Builder locationBuilder = Location.Builder.newInstance();
-		locationBuilder.setId(carrierService.getLocationLinkId().toString());
+		locationBuilder.setId(carrierService.getLinkId().toString() );
 		if(locationCoord != null) {
 			locationBuilder.setCoordinate(Coordinate.newInstance(locationCoord.getX(), locationCoord.getY()));
 		}
@@ -401,11 +398,11 @@ public class MatsimJspritFactory {
 			}
 			Coord coordinate = null;
 			if(network != null){
-				Link link = network.getLinks().get(service.getLocationLinkId());
+				Link link = network.getLinks().get(service.getLinkId() );
 				if(link != null) {
 					coordinate = link.getCoord();
 				}
-				else log.warn("cannot find linkId " + service.getLocationLinkId());
+				else log.warn("cannot find linkId " + service.getLinkId() );
 			}
 			serviceInVrp = true;
 			vrpBuilder.addJob(createService(service, coordinate));
@@ -483,9 +480,9 @@ public class MatsimJspritFactory {
 			}
 			Coord coordinate = null;
 			if(network != null){
-				Link link = network.getLinks().get(service.getLocationLinkId());
+				Link link = network.getLinks().get(service.getLinkId() );
 				if(link == null) {
-					throw new IllegalStateException("cannot create service since linkId " + service.getLocationLinkId() + " does not exists in network.");
+					throw new IllegalStateException("cannot create service since linkId " + service.getLinkId() + " does not exists in network.");
 				}
 				else coordinate = link.getCoord();
 			}

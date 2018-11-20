@@ -23,7 +23,6 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -132,7 +131,7 @@ public class TestMatsimTransformer {
 		
 		CarrierService service = MatsimJspritFactory.createCarrierService(carrierService);
 		assertNotNull(service);
-		assertEquals("locationId", service.getLocationLinkId().toString());
+		assertEquals("locationId", service.getLinkId().toString() );
 		assertEquals(30.0 , service.getServiceDuration(), 0.01);
 		assertEquals(50, service.getCapacityDemand());
 		assertEquals(10.0, service.getServiceStartTimeWindow().getStart(),0.01);
@@ -221,7 +220,7 @@ public class TestMatsimTransformer {
             if(e instanceof org.matsim.contrib.freight.carrier.Tour.TourActivity){
                 if(e instanceof org.matsim.contrib.freight.carrier.Tour.ServiceActivity){
                     CarrierService carrierService = ((org.matsim.contrib.freight.carrier.Tour.ServiceActivity) e).getService();
-                    Service service = Service.Builder.newInstance(carrierService.getId().toString()).setLocation(Location.newInstance(carrierService.getLocationLinkId().toString())).build();
+                    Service service = Service.Builder.newInstance(carrierService.getId().toString()).setLocation(Location.newInstance(carrierService.getLinkId().toString() ) ).build();
                     services.add(service);
                 }
             }

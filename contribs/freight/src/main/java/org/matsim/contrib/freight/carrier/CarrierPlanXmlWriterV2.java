@@ -6,8 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.graphhopper.jsprit.core.problem.job.Shipment;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -148,7 +146,7 @@ public class CarrierPlanXmlWriterV2 extends MatsimXmlWriter {
 			serviceMap.put(s, s.getId());
 			writer.write("\t\t\t\t<service ");
 			writer.write("id=\"" + s.getId().toString() + "\" ");
-			writer.write("to=\"" + s.getLocationLinkId() + "\" ");
+			writer.write("to=\"" + s.getLinkId() + "\" " );
 			// capacity which must be available when vehicle services this service.
 			// i.e. this is a pick-up service.
 			writer.write("capacityDemand=\"" + s.getCapacityDemand() + "\" "); 

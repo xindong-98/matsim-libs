@@ -368,7 +368,7 @@ public class Tour {
 
 		@Override
 		public Id<Link> getLocation() {
-			return service.getLocationLinkId();
+			return service.getLinkId();
 		}
 
 		@Override

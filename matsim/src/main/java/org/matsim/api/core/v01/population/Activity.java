@@ -23,55 +23,37 @@ package org.matsim.api.core.v01.population;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.population.BasicActivity;
 import org.matsim.facilities.ActivityFacility;
 
 /**
  * Specifies the kind of activity an agent performs during its day.
  * 
  */
-public interface Activity extends PlanElement {
+public interface Activity extends PlanElement, BasicActivity{
 
-	public double getEndTime();
+	double getEndTime();
 
-	public void setEndTime(final double seconds);
+	void setEndTime( final double seconds );
 
-	public String getType();
+	String getType();
 
-	public void setType(final String type);
+	void setType( final String type );
 
-	/**
-	 * @return the coordinate of the activity, possibly null.
-	 * <p></p>
-	 * Note that there is deliberately no way to set the coordinate except at creation.  
-	 * We might consider something like moveActivityTo( linkid, coord ).  kai, aug'10 
-	 */
-	public Coord getCoord();
-
-	public double getStartTime();
+	double getStartTime();
 
 	/**
 	 * Used for reporting outcomes in the scoring. Not interpreted for the demand.
 	 */
-	public void setStartTime(double seconds);
+	void setStartTime( double seconds );
 	
-	public double getMaximumDuration() ;
+	double getMaximumDuration() ;
 	
-	public void setMaximumDuration(double seconds) ;
+	void setMaximumDuration( double seconds ) ;
 
-	/**
-	 * @return the if of the link to which the activity is attached.  This may start as null, but
-	 * is usually set automatically by the control(l)er before the zeroth iteration.
-	 * <p></p>
-	 * Note that there is deliberately no way to set the link id except at creation.  
-	 * We might consider something like moveActivityTo( linkid, coord ).  kai, aug'10 
-	 */
-	public Id<Link> getLinkId();
-
-	public Id<ActivityFacility> getFacilityId();
-
-	public void setLinkId(final Id<Link> id);
+	void setLinkId( final Id<Link> id );
 	
-	public void setFacilityId(final Id<ActivityFacility> id);
+	void setFacilityId( final Id<ActivityFacility> id );
 
 	void setCoord(Coord coord);
 

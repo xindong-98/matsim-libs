@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.Builder;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities.FleetSize;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
@@ -32,7 +34,7 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 
 	public static String CARRIER = "carrier";
 
-	public static String LINKID = "linkId";
+//	public static String LINKID = "linkId";
 
 	public static String SHIPMENTS = "shipments";
 
@@ -61,6 +63,9 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 	private static final String VEHICLESTART = "earliestStart";
 
 	private static final String VEHICLEEND = "latestEnd";
+
+	private static final String XX = "x" ;
+	private static final String YY = "y" ;
 
 	private Carrier currentCarrier = null;
 
@@ -123,13 +128,34 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 			serviceMap = new HashMap<>();
 		}
 		else if (name.equals("service")) {
-			String idString = atts.getValue("id");
+			String idString = atts.getValue(ID);
 			if(idString == null) throw new IllegalStateException("service.id is missing.");
 			Id<CarrierService> id = Id.create(idString, CarrierService.class);
-			String toLocation = atts.getValue("to");
-			if(toLocation == null) throw new IllegalStateException("service.to is missing. ");
-			Id<Link> to = Id.create(toLocation, Link.class);
-			CarrierService.Builder serviceBuilder = CarrierService.Builder.newInstance(id, to);
+
+			CarrierService.Builder serviceBuilder ;
+
+			String toLocation = atts.getValue(TO);
+
+			String xx = atts.getValue( XX ) ;
+			String yy = atts.getValue( YY ) ;
+			if ( (xx==null && yy!=null) || (xx!=null && yy==null) )  {
+				throw new IllegalStateException( "coordinates are inconsistent" ) ;
+			}
+			if ( xx!=null ) {
+				// coordinates are in xml:
+				Coord coord = new Coord( Double.parseDouble(xx), Double.parseDouble(yy) ) ;
+				serviceBuilder = CarrierService.Builder.newInstance( id, coord );
+
+				// link id is _also_ in xml:
+				if ( toLocation!=null ) {
+					serviceBuilder.setLinkId( Id.create( toLocation, Link.class ) ) ;
+				}
+			} else {
+				// coordinates are NOT in xml:
+				if ( toLocation==null ) throw new IllegalStateException( "both service.x/y and service.link are missing" ) ;
+				serviceBuilder = CarrierService.Builder.newInstance( id, Id.createLinkId( toLocation ) );
+			}
+
 			String capDemandString = atts.getValue("capacityDemand");
 			if(capDemandString != null) serviceBuilder.setCapacityDemand(getInt(capDemandString));
 			String startString = atts.getValue("earliestStart");
@@ -294,9 +320,9 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 				if(id == null) throw new IllegalStateException("act.serviceId is missing.");
 				CarrierService s = serviceMap.get(Id.create(id, CarrierService.class));
 				if(s == null) throw new IllegalStateException("serviceId is not known.");
-				finishLeg(s.getLocationLinkId());
+				finishLeg(s.getLinkId() );
 				currentTourBuilder.scheduleService(s);
-				previousActLoc = s.getLocationLinkId();
+				previousActLoc = s.getLinkId();
 			} else if (type.equals("end")) {
 				finishLeg(currentVehicle.getLocation());
 				currentTourBuilder.scheduleEnd(currentVehicle.getLocation(), TimeWindow.newInstance(currentVehicle.getEarliestStartTime(),currentVehicle.getLatestEndTime()));
