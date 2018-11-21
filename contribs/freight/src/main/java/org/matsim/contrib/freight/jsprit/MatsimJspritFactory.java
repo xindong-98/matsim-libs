@@ -383,7 +383,7 @@ public class MatsimJspritFactory {
 			Coord coordinate = null;
 			if(network != null) {
 				Link link = network.getLinks().get(v.getLocation());
-				if(link == null) throw new IllegalStateException("vehicle.locationId cannot be found in network [vehicleId=" + v.getVehicleId() + "][locationId=" + v.getLocation() + "]");
+				if(link == null) throw new IllegalStateException("vehicle.locationId cannot be found in network [vehicleId=" + v.getVehicleId() + "][locationId=" + v.getLocation() + "]"); //TODO: try to find link from Coordinates first before throwing exception kmt nov18
 				coordinate = link.getCoord();
 			} else log.warn("cannot find linkId " + v.getVehicleId());
 			Vehicle veh = createVehicle(v, coordinate);
@@ -395,14 +395,15 @@ public class MatsimJspritFactory {
 		for(CarrierService service : carrier.getServices()){
 			if (shipmentInVrp) {
 				throw new UnsupportedOperationException("VRP with miexed Services and Shipments may lead to invalid solutions because of vehicle capacity handling are different");
-			}
-			Coord coordinate = null;
+			}	
+			Coord coordinate = null;		
 			if(network != null){
 				Link link = network.getLinks().get(service.getLinkId() );
 				if(link != null) {
 					coordinate = link.getCoord();
 				}
-				else log.warn("cannot find linkId " + service.getLinkId() );
+				else log.warn("cannot find linkId " + service.getLinkId() );	 //Why is here only a warning and no exception? kmt nov18
+				//TODO: try to find link from Coordinates first before throwing exception kmt nov18
 			}
 			serviceInVrp = true;
 			vrpBuilder.addJob(createService(service, coordinate));
@@ -425,7 +426,7 @@ public class MatsimJspritFactory {
 					vrpBuilder.addJob(createShipment(carrierShipment, fromCoordinate, toCoordinate));
 				} else 
 					throw new IllegalStateException("cannot create shipment since neither fromLinkId " + carrierShipment.getTo() + " nor toLinkId " + carrierShipment.getTo() + " exists in network.");
-					
+				//TODO: try to find link from Coordinates first before throwing exception kmt nov18
 			}
 			shipmentInVrp = true;
 			vrpBuilder.addJob(createShipment(carrierShipment, fromCoordinate, toCoordinate));
