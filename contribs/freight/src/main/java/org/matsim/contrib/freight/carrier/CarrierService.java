@@ -111,6 +111,11 @@ public final class CarrierService implements BasicActivity{
 		return id;
 	}
 
+	@Deprecated //use getLinkId() instead /kmt nov'18
+	public Id<Link> getLocationLinkId() {
+		return locationId;
+	}
+	
 	public Id<Link> getLinkId() {
 		return locationId;
 	}
