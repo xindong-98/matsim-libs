@@ -195,7 +195,9 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 				}
 			} else {
 				// coordinates are NOT in xml:
-				if ( toLocation==null ) throw new IllegalStateException( "both service.x/y and service.link are missing" ) ;
+				if ( toLocation==null ) {
+					throw new IllegalStateException( "both service.x/y and service.link are missing for service " + id.toString() ) ;
+					}
 				serviceBuilder = CarrierService.Builder.newInstance( id, Id.createLinkId( toLocation ) );
 			}
 
@@ -219,17 +221,96 @@ class CarrierPlanXmlParserV2 extends MatsimXmlParser {
 			currentShipments = new HashMap<String, CarrierShipment>();
 		}
 		else if (name.equals(SHIPMENT)) {
+			CarrierShipment.Builder shipmentBuilder = null;
+			
 			String idString = atts.getValue(ID);
 			if(idString == null) throw new IllegalStateException("shipment.id is missing.");
 			Id<CarrierShipment> id = Id.create(idString, CarrierShipment.class);
+
+			//TODO: Check for attributes functionality XX and YY (both are in to and in from), KMT feb19
+			
 			String from = atts.getValue(FROM);
 			if(from == null) throw new IllegalStateException("shipment.from is missing.");
-			String to = atts.getValue(TO);
-			if(to == null) throw new IllegalStateException("shipment.to is missing.");
+			
+			String fromLink = atts.getValue(FROM);
+			String xxFrom = atts.getValue( XX ) ;
+			String yyFrom = atts.getValue( YY ) ;		
+			
+			Coord fromCoord = null;
+			Id<Link> fromLinkId = null;
+			
+			if ( (xxFrom==null && yyFrom!=null) || (xxFrom!=null && yyFrom==null) )  {
+				throw new IllegalStateException( "From-coordinates are inconsistent for shipment: " + id.toString()) ;
+			}
+			if ( xxFrom!=null ) {
+				// coordinates are in xml:
+				fromCoord = new Coord( Double.parseDouble(xxFrom), Double.parseDouble(yyFrom) ) ;
+				// link id is _also_ in xml:
+				if ( fromLink!=null ) {
+					fromLinkId = Id.createLinkId(fromLink);
+				}
+			} else {
+				// coordinates are NOT in xml:
+				if ( fromLink==null ) {
+					throw new IllegalStateException( "both shipment.x/y and shipment.link are missing for shipment " + id.toString() ) ;
+					}
+				fromLinkId = Id.createLinkId(fromLink);
+			}
+
+			String toLink = atts.getValue(TO);
+			String xxTo = atts.getValue( XX ) ;
+			String yyTo = atts.getValue( YY ) ;		
+			
+			Coord toCoord = null;
+			Id<Link> toLinkId = null;
+			
+			if ( (xxTo==null && yyTo!=null) || (xxTo!=null && yyTo==null) )  {
+				throw new IllegalStateException( "To-coordinates are inconsistent for shipment: " + id.toString()) ;
+			}
+			if ( xxTo!=null ) {
+				// coordinates are in xml:
+				toCoord = new Coord( Double.parseDouble(xxTo), Double.parseDouble(yyTo) ) ;
+				// link id is _also_ in xml:
+				if ( toLink!=null ) {
+					toLinkId = Id.createLinkId(toLink);
+				}
+			} else {
+				// coordinates are NOT in xml:
+				if ( toLink==null ) {
+					throw new IllegalStateException( "both shipment.x/y and shipment.link are missing for shipment " + id.toString() ) ;
+					}
+				toLinkId = Id.createLinkId(toLink);
+			}
+				
 			String sizeString = atts.getValue(SHIPMENT_DEMAND_SIZE);										//TODO: Unify shipment.size and service.capacityDemand kmt, nov'18
 			if(sizeString == null) throw new IllegalStateException("shipment.size is missing.");
 			int size = getInt(sizeString);
-			CarrierShipment.Builder shipmentBuilder = CarrierShipment.Builder.newInstance(id, Id.create(from, Link.class), Id.create(to, Link.class), size);
+			
+			if (toCoord != null && fromCoord != null ) {
+				//Coordinates are available for both to and from
+				shipmentBuilder = CarrierShipment.Builder.newInstance(id, fromLinkId, toLinkId, size);
+				//from link id is _also_ available
+				if (fromLinkId != null) {
+					shipmentBuilder.setFromLinkId(fromLinkId);
+				} //to link id is _also_ available
+				if (toLinkId != null) {
+					shipmentBuilder.setToLinkId(toLinkId);
+				}
+			} else if (toCoord == null & fromCoord == null) {
+				//Coordinates are _neither_ available for from _nor_ for to location.
+				if (fromLinkId != null && toLinkId != null) {
+					//but for both locations linkIds are available
+					shipmentBuilder = CarrierShipment.Builder.newInstance(id, fromLinkId, toLinkId, size);
+				} else {
+					//Shipment.from and Shipment.to are defined inconsistent ore incomplete: Should be at least both  with coordinates or both with links.
+					throw new IllegalStateException( "from and to location are defined inconsitent or incomplete for shipment: " + id.toString() ) ;
+			
+				}
+			} else {
+				//Shipment.from and Shipment.to are defined inconsistent: Should be at least both  with coordinates or both with links.
+				throw new IllegalStateException( "from and to location are defined inconsitent for shipment: " + id.toString() ) ;
+			}
+			
 			
 			String startPickup = atts.getValue(START_PICKUP);
 			String endPickup = atts.getValue(END_PICKUP);

@@ -1,7 +1,10 @@
 package org.matsim.contrib.freight.carrier;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.freight.carrier.CarrierService.Builder;
+import org.matsim.facilities.ActivityFacility;
 
 /**
  * A shipment from one location to another, with certain size and other constraints such as time-windows and service-times.
@@ -53,12 +56,30 @@ public final class CarrierShipment {
 		 * @return the builder
 		 */
 		public static Builder newInstance(Id<CarrierShipment> id, Id<Link> from, Id<Link> to, int size){
-			return new Builder(id, from,to,size);
+			return new Builder(id, from, to, size);
+		}
+		
+		/**
+		 * Returns a new shipment builder.
+		 * 
+		 * <p> The builder is init with the shipment's origin (from), destination (to) and with the shipment's size.
+		 * The default-value for serviceTime is 0.0. The default-value for a timeWindow is [start=0.0, end=Double.maxValue()].
+		 * 
+		 * @param id
+		 * @param from
+		 * @param to
+		 * @param size
+		 * @return the builder
+		 */
+		public static Builder newInstance(Id<CarrierShipment> id, Coord from, Coord to, int size){
+			return new Builder(id, from, to, size);
 		}
 		
 		Id<CarrierShipment> id;
 		Id<Link> from;
 		Id<Link> to;
+		private Coord fromCoord;
+		private Coord toCoord;
 		int size;
 		TimeWindow pickTW = TimeWindow.newInstance(0.0, Integer.MAX_VALUE);
 		TimeWindow delTW = TimeWindow.newInstance(0.0, Integer.MAX_VALUE);
@@ -76,11 +97,19 @@ public final class CarrierShipment {
 			this.size = size;
 		}
 		
-		public Builder(Id<CarrierShipment> id, Id<Link> from, Id<Link> to, int size) {
+		public Builder(Id<CarrierShipment> id, Id<Link> fromLinkId, Id<Link> toLinkId, int size) {
 			super();
 			this.id = id;
-			this.from = from;
-			this.to = to;
+			this.from = fromLinkId;
+			this.to = toLinkId;
+			this.size = size;
+		}
+		
+		private Builder(Id<CarrierShipment> id, Coord fromCoord, Coord toCoord, int size) {
+			super();
+			this.id = id;
+			this.fromCoord = fromCoord;
+			this.toCoord = toCoord;
 			this.size = size;
 		}
 		
@@ -107,13 +136,25 @@ public final class CarrierShipment {
 		public CarrierShipment build(){
 			return new CarrierShipment(this);
 		}
+
+		public void setToLinkId(Id<Link> toLinkId) {
+			this.to = toLinkId;
+		}
+		
+		public void setFromLinkId(Id<Link> fromLinkId) {
+			this.from = fromLinkId;
+		}
 	}
 	
 	private final Id<CarrierShipment> id;
 	
-	private final Id<Link> from;
+	private Id<Link> from;
 
-	private final Id<Link> to;
+	private Id<Link> to;
+	
+	private Coord fromCoord;
+	
+	private Coord toCoord;
 
 	private final int size;
 
@@ -125,19 +166,13 @@ public final class CarrierShipment {
 
 	private double deliveryServiceTime;
 
-//	public CarrierShipment(final Id from, final Id to, final int size, final TimeWindow pickupTimeWindow, final TimeWindow deliveryTimeWindow) {
-//		super();
-//		this.from = from;
-//		this.to = to;
-//		this.size = size;
-//		this.pickupTimeWindow = pickupTimeWindow;
-//		this.deliveryTimeWindow = deliveryTimeWindow;
-//	}
 
 	private CarrierShipment(Builder builder) {
 		id = builder.id;
 		from = builder.from;
 		to = builder.to;
+		fromCoord = builder.fromCoord;
+		toCoord = builder.toCoord;
 		size = builder.size;
 		pickupServiceTime = builder.pickServiceTime;
 		deliveryServiceTime = builder.delServiceTime;
@@ -160,6 +195,20 @@ public final class CarrierShipment {
 	public void setDeliveryServiceTime(double deliveryServiceTime) {
 		this.deliveryServiceTime = deliveryServiceTime;
 	}
+	
+	// if we allow CarrierShipment to initially have only coordinates, then it needs to be possible to set the link later.
+	// Alternatively, could generate the link when reading the file.  That, however, would imply to _always_ have a network
+	// when reading the carrier file, which is impractical and was eventually removed in main matsim.  kai, nov'18
+	public void setFromLinkId( Id<Link> linkId ){
+		this.from = linkId ;
+	}
+	
+	// if we allow CarrierShipment to initially have only coordinates, then it needs to be possible to set the link later.
+	// Alternatively, could generate the link when reading the file.  That, however, would imply to _always_ have a network
+	// when reading the carrier file, which is impractical and was eventually removed in main matsim.  kai, nov'18
+	public void setToLinkId( Id<Link> linkId ){
+		this.to = linkId ;
+	}
 
 	public Id<CarrierShipment> getId() {
 		return id;
@@ -172,6 +221,14 @@ public final class CarrierShipment {
 		return to;
 	}
 
+	public Coord getFromCoord() {
+		return fromCoord;
+	}
+
+	public Coord getToCoord() {
+		return toCoord;
+	}
+
 	public int getSize() {
 		return size;
 	}
@@ -182,6 +239,16 @@ public final class CarrierShipment {
 
 	public TimeWindow getDeliveryTimeWindow() {
 		return deliveryTimeWindow;
+	}
+	
+	public Id<ActivityFacility> getFromFacilityId() {
+		return null ;
+		// yyyy maybe implement at some point.  kai/kmt, feb'19
+	}
+	
+	public Id<ActivityFacility> getToFacilityId() {
+		return null ;
+		// yyyy maybe implement at some point.  kai/kmt, feb'19
 	}
 
 	@Override
