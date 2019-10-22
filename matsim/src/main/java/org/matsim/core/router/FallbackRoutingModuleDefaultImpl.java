@@ -32,7 +32,8 @@ class FallbackRoutingModuleDefaultImpl implements  FallbackRoutingModule {
 		Id<Link> dpLinkId = FacilitiesUtils.decideOnLink( fromFacility, network ).getId() ;
 		Id<Link> arLinkId = FacilitiesUtils.decideOnLink( toFacility, network ).getId() ;
 		NetworkRoutingInclAccessEgressModule.routeBushwhackingLeg( person, leg, fromCoord, toCoord, departureTime, dpLinkId, arLinkId, population.getFactory(), 
-				pcrCfg.getModeRoutingParams().get(TransportMode.non_network_walk) ) ;
+				pcrCfg.getModeRoutingParams().get(TransportMode.non_network_walk).getBeelineDistanceFactor(),
+				pcrCfg.getModeRoutingParams().get(TransportMode.non_network_walk).getTeleportedModeSpeed()) ;
 		return Collections.singletonList( leg ) ;
 	}
 }

@@ -53,6 +53,9 @@ import java.util.List;
  * @author thibautd, nagel
  */
 public final class NetworkRoutingInclAccessEgressModule implements RoutingModule {
+	public static final String LINK_ATTRIBUTE_BEELINE_DISTANCE_FACTOR = "accessEgressBeelineDistanceFactor";
+	public static final String LINK_ATTRIBUTE_TELEPORTED_MODE_SPEED = "accessEgressTeleportedModeSpeed";
+	
 	private static final Logger log = Logger.getLogger( NetworkRoutingInclAccessEgressModule.class );
 
 	private final String mode;
@@ -132,6 +135,18 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 		if( isNotNeedingBushwhackingLeg( toFacility ) ) {
 			return;
 		}
+		
+		// old default for backwards compatibility
+		double beelineDistanceFactor = 1.3;
+		double teleportedModeSpeed = 2.0;
+		
+		if (egressActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_BEELINE_DISTANCE_FACTOR) != null) {
+			beelineDistanceFactor = (double) egressActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_BEELINE_DISTANCE_FACTOR);
+		}
+		
+		if (egressActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_TELEPORTED_MODE_SPEED) != null) {
+			teleportedModeSpeed = (double) egressActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_TELEPORTED_MODE_SPEED);
+		}
 
 		Coord startCoord = egressActLink.getToNode().getCoord() ;
 		Gbl.assertNotNull( startCoord );
@@ -156,7 +171,7 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 
 		Leg egressLeg = populationFactory.createLeg( TransportMode.non_network_walk ) ;
 		egressLeg.setDepartureTime( now );
-		routeBushwhackingLeg(person, egressLeg, startCoord, toFacility.getCoord(), now, startLinkId, endLinkId, populationFactory ) ;
+		routeBushwhackingLeg(person, egressLeg, startCoord, toFacility.getCoord(), now, startLinkId, endLinkId, populationFactory, beelineDistanceFactor, teleportedModeSpeed ) ;
 		result.add( egressLeg ) ;
 
 	}
@@ -175,6 +190,18 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 		if ( isNotNeedingBushwhackingLeg( fromFacility ) ) {
 			return now ;
 		}
+		
+		// old default for backwards compatibility
+		double beelineDistanceFactor = 1.3;
+		double teleportedModeSpeed = 2.0;
+		
+		if (accessActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_BEELINE_DISTANCE_FACTOR) != null) {
+			beelineDistanceFactor = (double) accessActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_BEELINE_DISTANCE_FACTOR);
+		}
+		
+		if (accessActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_TELEPORTED_MODE_SPEED) != null) {
+			teleportedModeSpeed = (double) accessActLink.getAttributes().getAttribute(LINK_ATTRIBUTE_TELEPORTED_MODE_SPEED);
+		}
 
 		Coord endCoord  = accessActLink.getToNode().getCoord() ;
 		// yyyy think about better solution: this may generate long walks along the link. (e.g. orthogonal projection)
@@ -188,7 +215,8 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 			accessActLink.getId();
 		}
 
-		now += routeBushwhackingLeg(person, accessLeg, fromFacility.getCoord(), endCoord, now, startLinkId, accessActLink.getId(), populationFactory ) ;
+		now += routeBushwhackingLeg(person, accessLeg, fromFacility.getCoord(), endCoord, now, startLinkId, accessActLink.getId(), populationFactory, 
+				beelineDistanceFactor, teleportedModeSpeed ) ;
 		// yyyy might be possible to set the link ids to null. kai & dominik, may'16
 
 		result.add( accessLeg ) ;
@@ -207,15 +235,14 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 
 	static double routeBushwhackingLeg(Person person, Leg leg, Coord fromCoord, Coord toCoord, double depTime,
 			Id<Link> dpLinkId, Id<Link> arLinkId, PopulationFactory pf) {
-		PlansCalcRouteConfigGroup.ModeRoutingParams params = new PlansCalcRouteConfigGroup.ModeRoutingParams();
-		// old defaults
-		params.setBeelineDistanceFactor(1.3);
-		params.setTeleportedModeSpeed(2.0);
-		return routeBushwhackingLeg(person, leg, fromCoord, toCoord, depTime, dpLinkId, arLinkId, pf, params);
+		//old defaults
+		double beelineDistanceFactor = 1.3;
+		double teleportedModeSpeed = 2.0;
+		return routeBushwhackingLeg(person, leg, fromCoord, toCoord, depTime, dpLinkId, arLinkId, pf, beelineDistanceFactor, teleportedModeSpeed);
 	}
 
 	static double routeBushwhackingLeg(Person person, Leg leg, Coord fromCoord, Coord toCoord, double depTime,
-			Id<Link> dpLinkId, Id<Link> arLinkId, PopulationFactory pf, PlansCalcRouteConfigGroup.ModeRoutingParams params) {
+			Id<Link> dpLinkId, Id<Link> arLinkId, PopulationFactory pf, double beelineDistanceFactor, double teleportedModeSpeed) {
 		// I don't think that it makes sense to use a RoutingModule for this, since that again makes assumptions about how to
 		// map facilities, and if you follow through to the teleportation routers one even finds activity wrappers, which is yet another
 		// complication which I certainly don't want here.  kai, dec'15
@@ -227,14 +254,10 @@ public final class NetworkRoutingInclAccessEgressModule implements RoutingModule
 		double dist = CoordUtils.calcEuclideanDistance(fromCoord,toCoord);
 
 		// create an empty route, but with realistic travel time
-		Route route =pf.getRouteFactories().createRoute(Route.class, dpLinkId, arLinkId ); 
-
-		Gbl.assertNotNull( params );
-		double beelineDistanceFactor = params.getBeelineDistanceFactor();
-		double networkTravelSpeed = params.getTeleportedModeSpeed();
+		Route route =pf.getRouteFactories().createRoute(Route.class, dpLinkId, arLinkId );
 
 		double estimatedNetworkDistance = dist * beelineDistanceFactor;
-		int travTime = (int) (estimatedNetworkDistance / networkTravelSpeed);
+		int travTime = (int) (estimatedNetworkDistance / teleportedModeSpeed);
 		route.setTravelTime(travTime);
 		route.setDistance(estimatedNetworkDistance);
 		leg.setRoute(route);
