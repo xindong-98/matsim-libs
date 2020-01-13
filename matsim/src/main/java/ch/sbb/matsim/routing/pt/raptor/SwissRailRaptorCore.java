@@ -795,11 +795,11 @@ public class SwissRailRaptorCore {
             }
             pes.addFirst(pe);
         }
-        if (pes.size() == 2 && pes.get(0).isTransfer && pes.get(1).isTransfer) {
-            // it's only access and egress, no real pt trip
-            arrivalCost = Double.POSITIVE_INFINITY;
-            pes.clear();
-        }
+//        if (pes.size() == 2 && pes.get(0).isTransfer && pes.get(1).isTransfer) {
+//            // it's only access and egress, no real pt trip
+//            arrivalCost = Double.POSITIVE_INFINITY;
+//            pes.clear();
+//        }
 
 	    // yyyyyy I am having the following situation:
 	    // * assume there is only one drt link.  This happens when the pt trip is outside the service area, and then both the starting and the ending
