@@ -32,6 +32,7 @@ public class SwissRailRaptorConfigGroup extends ReflectiveConfigGroup {
     private static final String PARAM_TRANSFER_PENALTY_MIN = "transferPenaltyMinCost";
     private static final String PARAM_TRANSFER_PENALTY_MAX = "transferPenaltyMaxCost";
     private static final String PARAM_TRANSFER_PENALTY_PERHOUR = "transferPenaltyCostPerTravelTimeHour";
+    private static final String PARAM_NO_PT_LEG_IN_FOUND_ROUTE_BEHAVIOUR = "noPtLegInFoundRouteBehaviour";
 
     private boolean useRangeQuery = false;
     private boolean useIntermodality = false;
@@ -44,6 +45,9 @@ public class SwissRailRaptorConfigGroup extends ReflectiveConfigGroup {
     private double transferPenaltyHourlyCost = 0;
 
     private ScoringParameters scoringParameters = ScoringParameters.Default;
+    
+    // old default before inserting the switch
+    private NoPtLegInFoundRouteBehaviour noPtLegInFoundRouteBehaviour = NoPtLegInFoundRouteBehaviour.ReturnNull;
 
     private final Map<String, RangeQuerySettingsParameterSet> rangeQuerySettingsPerSubpop = new HashMap<>();
     private final Map<String, RouteSelectorParameterSet> routeSelectorPerSubpop = new HashMap<>();
@@ -57,6 +61,10 @@ public class SwissRailRaptorConfigGroup extends ReflectiveConfigGroup {
     
     public enum ScoringParameters {
     	Default, Individual
+    }
+    
+    public enum NoPtLegInFoundRouteBehaviour {
+    	ReturnNull, ReturnRouteWOPt
     }
 
     public SwissRailRaptorConfigGroup() {
@@ -91,6 +99,16 @@ public class SwissRailRaptorConfigGroup extends ReflectiveConfigGroup {
     @StringSetter(PARAM_INTERMODAL_ACCESS_EGRESS_MODE_SELECTION)
     public void setIntermodalAccessEgressModeSelection(IntermodalAccessEgressModeSelection intermodalAccessEgressModeSelection) {
         this.intermodalAccessEgressModeSelection = intermodalAccessEgressModeSelection;
+    }
+    
+    @StringGetter(PARAM_NO_PT_LEG_IN_FOUND_ROUTE_BEHAVIOUR)
+    public NoPtLegInFoundRouteBehaviour getNoPtLegInFoundRouteBehaviour() {
+        return this.noPtLegInFoundRouteBehaviour;
+    }
+
+    @StringSetter(PARAM_NO_PT_LEG_IN_FOUND_ROUTE_BEHAVIOUR)
+    public void setNoPtLegInFoundRouteBehaviour(NoPtLegInFoundRouteBehaviour noPtLegInFoundRouteBehaviour) {
+        this.noPtLegInFoundRouteBehaviour = noPtLegInFoundRouteBehaviour;
     }
 
     @StringGetter(PARAM_USE_MODE_MAPPING)

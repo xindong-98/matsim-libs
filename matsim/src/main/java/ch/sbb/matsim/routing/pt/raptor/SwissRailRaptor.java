@@ -101,7 +101,8 @@ public class SwissRailRaptor implements TransitRouter {
 		 * foundRoute.parts.size() == 0 can happen if SwissRasilRaptorCore.createRaptorRoute() finds a trip made up of,
 		 * only 2 parts which consists only of an access and an egress leg without any pt leg inbetween.
 		 */
-        if (foundRoute == null /*|| foundRoute.parts.size() == 0 || hasNoPtLeg(foundRoute.parts) */) {
+        if (foundRoute == null || (
+        		parameters.getConfig().getNoPtLegInFoundRouteBehaviour().equals(SwissRailRaptorConfigGroup.NoPtLegInFoundRouteBehaviour.ReturnNull) && (foundRoute.parts.size() == 0 || hasNoPtLeg(foundRoute.parts)))) {
         	if (person == null) {
             	log.debug("No route found for person null: trip from x=" + fromFacility.getCoord().getX() + ",y=" + fromFacility.getCoord().getY() + " departure at " + departureTime + " to x=" + toFacility.getCoord().getX() + ",y=" + toFacility.getCoord().getY());
         	} else {
