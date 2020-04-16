@@ -150,7 +150,17 @@ public class AStarEuclidean extends Dijkstra {
 			final double currTime, final double currCost, final Node toNode) {
 
 		final double travelTime = this.timeFunction.getLinkTravelTime(l, currTime, this.person, this.vehicle);
-		final double travelCost = this.costFunction.getLinkTravelDisutility(l, currTime, this.person, this.vehicle);		
+		final double travelCost = this.costFunction.getLinkTravelDisutility(l, currTime, this.person, this.vehicle);
+
+		if (travelCost <= 0) {
+			log.warn("Expected travelCost > 0, but was " + travelCost
+					+ ".\n   Link: " + l.getId() + " length=" + l.getLength() + " freespeed=" + l.getFreespeed()
+					+ ".\n   TravelTime=" + travelTime + ". TimeFunction=" + this.timeFunction.getClass().getCanonicalName()
+					+ ".\n   CurrTime=" + currTime + ". CostFunction=" + this.costFunction.getClass().getCanonicalName()
+					+ ".\n   Person=" + (this.person == null ? "unknown" : this.person.getId().toString()) + "  Vehicle=" + (this.vehicle == null ? "unknown" : this.vehicle.getId().toString())
+			);
+		}
+
 		final AStarNodeData data = getData(n);
 		if (!data.isVisited(getIterationId())) {
 			double remainingTravelCost = estimateRemainingTravelCost(n, toNode);
@@ -172,7 +182,11 @@ public class AStarEuclidean extends Dijkstra {
 								  "pointer exception later.  In my own case, it was related to a network " +
 								  "having freespeed infinity at places.  kai, jan'18") ;
 			}
-			
+
+			if (data.getPrevLink() == null) {
+				log.error("data.getPrevLink() == null, will crash... node="+ n.getId());
+			}
+
 			if (data.getPrevLink().getId().compareTo(l.getId()) > 0) {
 				revisitNode(n, data, pendingNodes, currTime + travelTime, totalCost, l);
 				return true;

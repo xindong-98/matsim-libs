@@ -20,6 +20,7 @@
 
 package org.matsim.core.router;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.priorityqueue.BinaryMinHeap;
@@ -75,8 +76,13 @@ public class FastAStarLandmarks extends AStarLandmarks {
 		
 		RoutingNetworkNode routingNetworkFromNode = routingNetwork.getNodes().get(fromNode.getId());
 		RoutingNetworkNode routingNetworkToNode = routingNetwork.getNodes().get(toNode.getId());
-		
-		return super.calcLeastCostPath(routingNetworkFromNode, routingNetworkToNode, startTime, person, vehicle);
+
+		try {
+			return super.calcLeastCostPath(routingNetworkFromNode, routingNetworkToNode, startTime, person, vehicle);
+		} catch (NullPointerException up) {
+			Logger.getLogger(FastAStarLandmarks.class).error("got a NullPointerException! fromNode=" + fromNode.getId() + " toNode=" + toNode.getId() + " time=" + startTime, up);
+			throw up;
+		}
 	}
 	
 	@Override
