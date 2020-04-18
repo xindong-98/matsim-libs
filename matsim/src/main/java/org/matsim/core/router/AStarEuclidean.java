@@ -155,8 +155,8 @@ public class AStarEuclidean extends Dijkstra {
 		if (travelCost <= 0) {
 			log.warn("Expected travelCost > 0, but was " + travelCost
 					+ ".\n   Link: " + l.getId() + " length=" + l.getLength() + " freespeed=" + l.getFreespeed()
-					+ ".\n   TravelTime=" + travelTime + ". TimeFunction=" + this.timeFunction.getClass().getCanonicalName()
-					+ ".\n   CurrTime=" + currTime + ". CostFunction=" + this.costFunction.getClass().getCanonicalName()
+					+ ".\n   TravelTime=" + travelTime + ". TimeFunction=" + this.timeFunction.getClass().getName()
+					+ ".\n   CurrTime=" + currTime + ". CostFunction=" + this.costFunction.getClass().getName()
 					+ ".\n   Person=" + (this.person == null ? "unknown" : this.person.getId().toString()) + "  Vehicle=" + (this.vehicle == null ? "unknown" : this.vehicle.getId().toString())
 			);
 		}

@@ -19,11 +19,7 @@
  * *********************************************************************** */
 package org.matsim.core.trafficmonitoring;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -49,10 +45,14 @@ import org.matsim.core.router.util.LinkToLinkTravelTime;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
-import com.google.inject.Inject;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Calculates actual travel times on link from events and optionally also the link-to-link 
@@ -515,7 +515,11 @@ public final class TravelTimeCalculator implements LinkEnterEventHandler, LinkLe
 					}
 				}
 				double linkTTimeFromObservation = TravelTimeCalculator.this.getLinkTravelTime(link, time);
-				return Math.max( linkTtimeFromVehicle, linkTTimeFromObservation) ;
+				double ttime = Math.max( linkTtimeFromVehicle, linkTTimeFromObservation);
+				if (ttime <= 0.0 && link.getLength() > 0) {
+					log.warn("Unexpected travel time: " + ttime + " link=" + link.getId() + " time=" + Time.writeTime(time) + " ttVeh=" + linkTtimeFromVehicle + " ttObs=" + linkTTimeFromObservation);
+				}
+				return ttime;
 				// yyyyyy should this not be min?  kai/janek, may'19
 				// No, it is correct. It is preventing the router to route with an empirical speed from
 				// the previous iteration that exceeds the maximum vehicle speed.
