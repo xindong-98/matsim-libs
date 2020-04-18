@@ -105,6 +105,8 @@ public final class PrepareForSimImpl implements PrepareForSim, PrepareForMobsim 
 
 	@Override
 	public void run() {
+		NetworkUtils.verifyConsistency(this.network);
+
 		/*
 		 * Create single-mode network here and hand it over to PersonPrepareForSim. Otherwise, each instance would create its
 		 * own single-mode network. However, this assumes that the main mode is car - which PersonPrepareForSim also does. Should

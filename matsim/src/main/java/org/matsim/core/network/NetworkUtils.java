@@ -36,7 +36,15 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Contains several helper methods for working with {@link Network networks}.
@@ -848,4 +856,39 @@ public final class NetworkUtils {
 	private static boolean testNodesAreEqual(Node expected, Node actual) {
 		return expected.getCoord().equals(actual.getCoord());
 	}
+	
+	public static void verifyConsistency(Network network) {
+		log.info("verifying links " + network.getLinks().size());
+		for (Link link : network.getLinks().values()) {
+			Node fromNode = link.getFromNode();
+			Node toNode = link.getToNode();
+
+			Node node = network.getNodes().get(fromNode.getId());
+			if (fromNode != node) {
+				log.warn("different from node: " + link.getId() + " " + link.getFromNode() + " " + link.getFromNode().getClass() + " " + System.identityHashCode(link.getFromNode()) + " <-> " + node + " " + node.getClass() + " " + System.identityHashCode(node) );
+			}
+			node = network.getNodes().get(toNode.getId());
+			if (toNode != node) {
+				log.warn("different to node: " + link.getId() + " " + link.getToNode() + " " + link.getToNode().getClass() + " " + System.identityHashCode(link.getToNode()) + " <-> " + node + " " + node.getClass() + " " + System.identityHashCode(node) );
+			}
+		}
+
+		log.info("verifying nodes " + network.getNodes().size());
+		for (Node node : network.getNodes().values()) {
+			for (Link nodeLink : node.getInLinks().values()) {
+				Link link = network.getLinks().get(nodeLink.getId());
+				if (nodeLink != link) {
+					log.warn("different in link: " + node.getId() + " " + nodeLink + " <-> " + link);
+				}
+			}
+			for (Link nodeLink : node.getOutLinks().values()) {
+				Link link = network.getLinks().get(nodeLink.getId());
+				if (nodeLink != link) {
+					log.warn("different out link: " + node.getId() + " " + nodeLink + " <-> " + link);
+				}
+			}
+		}
+		log.info("network verification done.");
+	}
+
 }
