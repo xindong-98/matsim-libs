@@ -488,12 +488,11 @@ public final class TravelTimeCalculator implements LinkEnterEventHandler, LinkLe
 
 					// if the travel time that has been measured so far is less than that minimum travel time, then do something:
 					if (travelTime < minTravelTime) {
-
-						data.setTravelTime(i, minTravelTime );
 						// (set the travel time to the smallest possible travel time that makes sense according to the argument above)
-
+						travelTime = minTravelTime;
+						data.setTravelTime(i, travelTime);
 					}
-					prevTravelTime = data.getTravelTime(i, i * this.timeSlice ) ;
+					prevTravelTime = travelTime;
 				}
 				data.setNeedsConsolidation( false );
 			}
