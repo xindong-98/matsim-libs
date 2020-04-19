@@ -20,7 +20,11 @@
 
 package org.matsim.core.trafficmonitoring;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
+
+import java.util.Arrays;
 
 /**
  * Implementation of {@link TravelTimeData} that stores the data per time bin
@@ -30,6 +34,8 @@ import org.matsim.api.core.v01.network.Link;
  * @author mrieser
  */
 class TravelTimeDataArray extends TravelTimeData {
+
+	private final static Logger LOG = LogManager.getLogger(TravelTimeDataArray.class);
 
 	private final short[] timeCnt;
 	private final double[] travelTimes;
@@ -54,6 +60,10 @@ class TravelTimeDataArray extends TravelTimeData {
 	public void setTravelTime( final int timeSlot, final double traveltime ) {
 		this.timeCnt[timeSlot] = 1;
 		this.travelTimes[timeSlot] = traveltime;
+		if (traveltime <= 0) {
+			LOG.warn("setting bad travel time: " + traveltime + " slot=" + timeSlot);
+			Thread.dumpStack();
+		}
 	}
 
 	@Override
@@ -77,6 +87,10 @@ class TravelTimeDataArray extends TravelTimeData {
 		double freespeed = this.link.getLength() / this.link.getFreespeed(now);
 		this.travelTimes[timeSlot] = freespeed;
 		return freespeed;
+	}
+
+	public void printDebug() {
+		LOG.info("internal data for " + link.getId() + "  tt=" + Arrays.toString(travelTimes) + "  cnt=" + Arrays.toString(timeCnt));
 	}
 
 }

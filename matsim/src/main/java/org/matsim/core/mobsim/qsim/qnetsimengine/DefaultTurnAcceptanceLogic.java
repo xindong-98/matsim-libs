@@ -54,7 +54,7 @@ public final class DefaultTurnAcceptanceLogic implements TurnAcceptanceLogic {
 			return AcceptTurn.ABORT ;
 		}
 		if (currentLink.getToNode() != nextQLink.getLink().getFromNode()) {
-			log.warn("Cannot move vehicle " + veh.getId() + " from link " + currentLink.getId() + " to link " + nextQLink.getLink().getId());
+			log.warn("Cannot move vehicle " + veh.getId() + " from link " + currentLink.getId() + " to link " + nextQLink.getLink().getId() + "   currentLInk.toNode = " + currentLink.getToNode().getId() + " " + System.identityHashCode(currentLink.getToNode()) + "   nextLink.fromNode = " + nextQLink.getLink().getFromNode().getId() + " " + System.identityHashCode(nextQLink.getLink().getFromNode()));
 			return AcceptTurn.ABORT ;
 		}
 //		if ( !nextQLink.getLink().getAllowedModes().contains( veh.getDriver().getMode() ) ) {

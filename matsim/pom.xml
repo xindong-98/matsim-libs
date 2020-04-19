@@ -5,7 +5,7 @@
 	<groupId>org.matsim</groupId>
 	<artifactId>matsim</artifactId>
 	<name>MATSim</name>
-	<version>12.0-astardebug4</version>
+	<version>12.0-astardebug5</version>
 	<description>Multi-Agent Transport Simulation</description>
 	<url>http://ci.matsim.org:8080/job/MATSim_M2/ws/matsim/target/site</url>
 	<inceptionYear>2005</inceptionYear>

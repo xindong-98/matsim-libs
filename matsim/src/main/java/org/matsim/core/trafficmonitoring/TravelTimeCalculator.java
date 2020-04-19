@@ -372,10 +372,19 @@ public final class TravelTimeCalculator implements LinkEnterEventHandler, LinkLe
 		if (this.calculateLinkTravelTimes) {
 
 			TravelTimeData data = this.dataContainerProvider.getTravelTimeData(link, true);
+			boolean wasConsolidated = false;
 			if ( data.isNeedingConsolidation() ) {
 				consolidateData(data);
+				wasConsolidated = true;
 			}
-			return this.travelTimeGetter.getTravelTime( data, time );
+			double ttime = this.travelTimeGetter.getTravelTime( data, time );
+			if (ttime <= 0.0) {
+				log.error("unexpected travel time: " + ttime + " link=" + link.getId() + " link.class=" + link.getClass().getName() + " data.class=" + data.getClass().getName() + " getter.class=" + this.travelTimeGetter.getClass().getName() + " consolidated=" + wasConsolidated);
+				if (data instanceof TravelTimeDataArray) {
+					((TravelTimeDataArray) data).printDebug();
+				}
+			}
+			return ttime;
 
 			/*
 			 * Workaround for jumps in returned travel times due to time bin approach?
@@ -517,7 +526,11 @@ public final class TravelTimeCalculator implements LinkEnterEventHandler, LinkLe
 				double linkTTimeFromObservation = TravelTimeCalculator.this.getLinkTravelTime(link, time);
 				double ttime = Math.max( linkTtimeFromVehicle, linkTTimeFromObservation);
 				if (ttime <= 0.0 && link.getLength() > 0) {
-					log.warn("Unexpected travel time: " + ttime + " link=" + link.getId() + " time=" + Time.writeTime(time) + " ttVeh=" + linkTtimeFromVehicle + " ttObs=" + linkTTimeFromObservation);
+					final VehicleType vehicleType = vehicle == null ? null : vehicle.getType();
+					String vehMaxVel = vehicleType == null ? "n/a" : Double.toString(vehicleType.getMaximumVelocity());
+					log.warn("Unexpected travel time: " + ttime + " link=" + link.getId() + " link.length=" + link.getLength() + " time=" + Time.writeTime(time)
+							+ " ttVeh=" + linkTtimeFromVehicle + " ttObs=" + linkTTimeFromObservation
+							+ " vehType=" + vehicleType + " vehTypeMaxVel=" + vehMaxVel);
 				}
 				return ttime;
 				// yyyyyy should this not be min?  kai/janek, may'19
