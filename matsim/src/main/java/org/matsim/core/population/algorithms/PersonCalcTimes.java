@@ -95,7 +95,7 @@ public final class PersonCalcTimes extends AbstractPersonAlgorithm {
 
 					leg.setDepartureTime(act.getEndTime().seconds());
 					OptionalTime ttime = leg.getTravelTime();
-					leg.setTravelTime( leg.getDepartureTime().seconds() + ttime.orElse(0) - leg.getDepartureTime()
+					leg.setTravelTime( leg.getDepartureTime().seconds() + ttime.seconds() - leg.getDepartureTime()
 							.seconds());
 				}
 			}
